@@ -1,0 +1,16 @@
+{
+  "name": "king-of-the-fools",
+  "version": "1.0.0",
+  "description": "You can deposit ETH or USDC into a smart contract, as long as it's at least 1.5x more money than the previous person.\r If you do that, you become \"King of the fools\", and your money gets sent back to the previous person.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "git+https://github.com/asa93/King-of-the-fools-smart-contract.git",
+  "author": "Slim <asa93@live.fr>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asa93/King-of-the-fools-smart-contract/issues"
+  },
+  "homepage": "https://github.com/asa93/King-of-the-fools-smart-contract#readme"
+}
