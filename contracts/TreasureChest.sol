@@ -17,6 +17,8 @@ contract TreasureChest is ReentrancyGuard {
 
     uint256 private _status;
 
+    mapping(address => uint256) balances;
+
     function deposit() public payable nonReentrant {
         require(
             msg.value >= 1 ether && msg.value > (currentDeposit * 3) / 2,
@@ -24,9 +26,19 @@ contract TreasureChest is ReentrancyGuard {
         );
 
         if (currentDepositer != address(0) && address(this).balance > 0) {
-            currentDepositer.call{value: address(this).balance};
+            balances[currentDepositer] = currentDeposit;
         }
         currentDeposit = msg.value;
         emit Deposit(msg.sender, currentDeposit);
+    }
+
+    function withdraw() public nonReentrant {
+        require(balances[msg.sender] > 0, "no fund available");
+
+        if (currentDepositer != address(0) && address(this).balance > 0) {
+            currentDepositer.call{value: balances[msg.sender]};
+            //handle error
+            balances[msg.sender] = 0;
+        }
     }
 }
