@@ -1,22 +1,29 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
-contract TreasureChest {
+contract TreasureChest is ReentrancyGuard {
     address payable public currentDepositer;
     uint256 public currentDeposit;
 
     event Deposit(address depositer, uint256 amount);
 
-    function deposit() public payable {
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+
+    uint256 private _status;
+
+    function deposit() public payable nonReentrant {
         require(
             msg.value >= 1 ether && msg.value > (currentDeposit * 3) / 2,
             "Deposit amount too low"
         );
 
-        if (currentDepositer != address(0)) {
+        if (currentDepositer != address(0) && address(this).balance > 0) {
             currentDepositer.call{value: address(this).balance};
         }
         currentDeposit = msg.value;
