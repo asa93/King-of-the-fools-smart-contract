@@ -41,8 +41,17 @@ describe("TreasureChest", function () {
       await expect(chest.deposit({ value: ethers.utils.parseEther("1") })).not
         .to.be.reverted;
     });
-  });
+    it("Shouldn fail to deposit using fallback", async function () {
+      const { chest, owner } = await loadFixture(deployFixture);
 
+      await expect(
+        owner.sendTransaction({
+          to: chest.address,
+          value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        })
+      ).to.be.revertedWith("use deposit method");
+    });
+  });
   describe("Withdrawals", function () {
     it("Shouldn't fail to withdraw if deposits are freed", async function () {
       const { chest } = await loadFixture(deployFixture);

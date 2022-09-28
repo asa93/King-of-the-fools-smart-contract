@@ -32,11 +32,15 @@ contract TreasureChest is ReentrancyGuard {
     }
 
     /// @dev we use a withdraw method instead of a direct transfer for improved security
-
     function withdraw() public nonReentrant {
         require(balances[msg.sender] > 0, "No funds available");
         msg.sender.call{value: balances[msg.sender]};
         emit Withdrawal(msg.sender, balances[msg.sender]);
         balances[msg.sender] = 0;
+    }
+
+    /// @dev we disable fallback in case a user accidentally send funds because we don't want to handle that case
+    receive() external payable {
+        revert("use deposit method");
     }
 }
