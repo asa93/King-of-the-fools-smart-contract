@@ -8,7 +8,7 @@ import "hardhat/console.sol";
 
 contract TreasureChest is ReentrancyGuard {
     address payable public kingOfFools;
-    uint256 public currentDeposit;
+    uint256 public lastDeposit;
     uint256 constant INIT_PRICE = 1 ether;
 
     /// @dev freed deposits that are ready for claim
@@ -19,16 +19,16 @@ contract TreasureChest is ReentrancyGuard {
 
     function deposit() public payable nonReentrant {
         require(
-            msg.value >= INIT_PRICE && msg.value >= (currentDeposit * 3) / 2,
+            msg.value >= INIT_PRICE && msg.value >= (lastDeposit * 3) / 2,
             "Deposit amount too low"
         );
 
+        //in the case of the first deposit, the funds go nowhere because kingOfFools = 0x0
         balances[kingOfFools] = msg.value;
-
         kingOfFools = payable(msg.sender);
-        currentDeposit = msg.value;
+        lastDeposit = msg.value;
 
-        emit Deposit(msg.sender, currentDeposit);
+        emit Deposit(msg.sender, msg.value);
     }
 
     /// @dev we use a withdraw method instead of a direct transfer for improved security
