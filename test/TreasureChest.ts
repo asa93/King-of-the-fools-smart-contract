@@ -39,13 +39,38 @@ describe("TreasureChest", function () {
 
       let depositAmount = ethers.utils.parseEther("1");
 
-      chest.deposit({ value: depositAmount });
+      await chest.deposit({ value: depositAmount });
 
       depositAmount = ethers.utils.parseEther("1");
 
       await expect(chest.deposit({ value: depositAmount })).to.be.revertedWith(
         "Deposit amount too low"
       );
+    });
+  });
+
+  describe("Withdrawals", function () {
+    it("Shouldn't fail to withdraw if deposits are freed", async function () {
+      const { chest } = await loadFixture(deployFixture);
+
+      let depositAmount = ethers.utils.parseEther("1");
+
+      await chest.deposit({ value: depositAmount });
+
+      depositAmount = ethers.utils.parseEther("1.5");
+
+      await chest.deposit({ value: depositAmount });
+
+      await expect(chest.withdraw()).not.to.be.reverted;
+    });
+    it("Should fail to withdraw if deposits are not freed", async function () {
+      const { chest } = await loadFixture(deployFixture);
+
+      let depositAmount = ethers.utils.parseEther("1");
+
+      await chest.deposit({ value: depositAmount });
+
+      await expect(chest.withdraw()).to.be.revertedWith("No funds available");
     });
   });
 });

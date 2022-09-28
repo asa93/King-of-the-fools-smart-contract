@@ -4,41 +4,40 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Uncomment this line to use console.log
-// import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 contract TreasureChest is ReentrancyGuard {
-    address payable public currentDepositer;
+    address payable public kingOfFools;
     uint256 public currentDeposit;
+    uint256 constant INIT_PRICE = 1 ether;
+
+    /// @dev freed deposits that are ready for claim
+    mapping(address => uint256) balances;
 
     event Deposit(address depositer, uint256 amount);
-
-    uint256 private constant _NOT_ENTERED = 1;
-    uint256 private constant _ENTERED = 2;
-
-    uint256 private _status;
-
-    mapping(address => uint256) balances;
+    event Withdrawal(address beneficiary, uint256 amount);
 
     function deposit() public payable nonReentrant {
         require(
-            msg.value >= 1 ether && msg.value > (currentDeposit * 3) / 2,
+            msg.value >= INIT_PRICE && msg.value >= (currentDeposit * 3) / 2,
             "Deposit amount too low"
         );
 
-        if (currentDepositer != address(0) && address(this).balance > 0) {
-            balances[currentDepositer] = currentDeposit;
-        }
+        balances[kingOfFools] = msg.value;
+
+        kingOfFools = payable(msg.sender);
         currentDeposit = msg.value;
+
         emit Deposit(msg.sender, currentDeposit);
     }
 
-    function withdraw() public nonReentrant {
-        require(balances[msg.sender] > 0, "no fund available");
+    /// @dev we use a withdraw method instead of a direct transfer for improved security
 
-        if (currentDepositer != address(0) && address(this).balance > 0) {
-            currentDepositer.call{value: balances[msg.sender]};
-            //handle error
-            balances[msg.sender] = 0;
-        }
+    function withdraw() public nonReentrant {
+        require(balances[msg.sender] > 0, "No funds available");
+        msg.sender.call{value: balances[msg.sender]};
+        //handle error
+        balances[msg.sender] = 0;
+        emit Withdrawal(msg.sender, balances[msg.sender]);
     }
 }
