@@ -36,8 +36,7 @@ contract TreasureChest is ReentrancyGuard {
     function withdraw() public nonReentrant {
         require(balances[msg.sender] > 0, "No funds available");
         msg.sender.call{value: balances[msg.sender]};
-        //handle error
-        balances[msg.sender] = 0;
         emit Withdrawal(msg.sender, balances[msg.sender]);
+        balances[msg.sender] = 0;
     }
 }

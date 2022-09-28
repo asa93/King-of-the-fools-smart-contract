@@ -21,31 +21,25 @@ describe("TreasureChest", function () {
     it("Should fail to deposit if amount below 1 eth", async function () {
       const { chest } = await loadFixture(deployFixture);
 
-      const depositAmount = ethers.utils.parseEther("0.1");
+      await expect(
+        chest.deposit({ value: ethers.utils.parseEther("0.1") })
+      ).to.be.revertedWith("Deposit amount too low");
+    });
 
-      await expect(chest.deposit({ value: depositAmount })).to.be.revertedWith(
-        "Deposit amount too low"
-      );
+    it("Should fail to deposit if amount not 1.5x previous deposit", async function () {
+      const { chest } = await loadFixture(deployFixture);
+
+      await chest.deposit({ value: ethers.utils.parseEther("1") });
+
+      await expect(
+        chest.deposit({ value: ethers.utils.parseEther("1") })
+      ).to.be.revertedWith("Deposit amount too low");
     });
     it("Shouldn't fail to deposit if amount is ok", async function () {
       const { chest } = await loadFixture(deployFixture);
 
-      const depositAmount = ethers.utils.parseEther("1");
-
-      await expect(chest.deposit({ value: depositAmount })).not.to.be.reverted;
-    });
-    it("Should fail to deposit if amount not 1.5x previous deposit", async function () {
-      const { chest } = await loadFixture(deployFixture);
-
-      let depositAmount = ethers.utils.parseEther("1");
-
-      await chest.deposit({ value: depositAmount });
-
-      depositAmount = ethers.utils.parseEther("1");
-
-      await expect(chest.deposit({ value: depositAmount })).to.be.revertedWith(
-        "Deposit amount too low"
-      );
+      await expect(chest.deposit({ value: ethers.utils.parseEther("1") })).not
+        .to.be.reverted;
     });
   });
 
@@ -53,24 +47,42 @@ describe("TreasureChest", function () {
     it("Shouldn't fail to withdraw if deposits are freed", async function () {
       const { chest } = await loadFixture(deployFixture);
 
-      let depositAmount = ethers.utils.parseEther("1");
+      await chest.deposit({ value: ethers.utils.parseEther("1") });
 
-      await chest.deposit({ value: depositAmount });
-
-      depositAmount = ethers.utils.parseEther("1.5");
-
-      await chest.deposit({ value: depositAmount });
+      await chest.deposit({ value: ethers.utils.parseEther("1.5") });
 
       await expect(chest.withdraw()).not.to.be.reverted;
     });
     it("Should fail to withdraw if deposits are not freed", async function () {
       const { chest } = await loadFixture(deployFixture);
 
-      let depositAmount = ethers.utils.parseEther("1");
-
-      await chest.deposit({ value: depositAmount });
+      await chest.deposit({ value: ethers.utils.parseEther("1") });
 
       await expect(chest.withdraw()).to.be.revertedWith("No funds available");
+    });
+  });
+  describe("Events", function () {
+    it("Should emit Deposit event", async function () {
+      const { chest, owner } = await loadFixture(deployFixture);
+
+      const depositAmount = ethers.utils.parseEther("1");
+      await expect(chest.deposit({ value: depositAmount }))
+        .to.emit(chest, "Deposit")
+        .withArgs(await owner.getAddress(), depositAmount);
+    });
+
+    it("Should emit Withdrawal event", async function () {
+      const { chest, owner } = await loadFixture(deployFixture);
+
+      let depositAmount = ethers.utils.parseEther("1");
+      await chest.deposit({ value: depositAmount });
+
+      depositAmount = ethers.utils.parseEther("1.5");
+      await chest.deposit({ value: depositAmount });
+
+      await expect(chest.withdraw())
+        .to.emit(chest, "Withdrawal")
+        .withArgs(await owner.getAddress(), depositAmount);
     });
   });
 });
