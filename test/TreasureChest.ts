@@ -58,7 +58,7 @@ describe("TreasureChest", function () {
 
       await chest.deposit({ value: ethers.utils.parseEther("1") });
 
-      await chest.deposit({ value: ethers.utils.parseEther("1.5") });
+      await chest.deposit({ value: ethers.utils.parseEther("1.2") });
 
       await expect(chest.withdraw()).not.to.be.reverted;
     });
