@@ -34,7 +34,8 @@ contract TreasureChest is ReentrancyGuardUpgradeable {
     /// @dev we use a withdraw method instead of a direct transfer for improved security
     function withdraw() public nonReentrant {
         require(balances[msg.sender] > 0, "No funds available");
-        msg.sender.call{value: balances[msg.sender]};
+        (bool sent, ) = msg.sender.call{value: balances[msg.sender]}("");
+        require(sent, "Failed to send Ether");
         emit Withdrawal(msg.sender, balances[msg.sender]);
         balances[msg.sender] = 0;
     }
