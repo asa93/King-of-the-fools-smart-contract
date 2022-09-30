@@ -1,8 +1,11 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 
 async function main() {
   const TreasureChest = await ethers.getContractFactory("TreasureChest");
-  const chest = await TreasureChest.deploy();
+
+  const chest = await upgrades.deployProxy(TreasureChest, []);
+
+  //const chest = await TreasureChest.deploy();
 
   await chest.deployed();
 

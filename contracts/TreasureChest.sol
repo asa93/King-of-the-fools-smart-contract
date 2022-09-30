@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 // Uncomment this line to use console.log
 import "hardhat/console.sol";
 
-contract TreasureChest is ReentrancyGuard {
+contract TreasureChest is ReentrancyGuardUpgradeable {
     address payable public kingOfFools;
     uint256 public lastDeposit;
     uint256 constant INIT_PRICE = 1 ether;
@@ -41,6 +41,6 @@ contract TreasureChest is ReentrancyGuard {
 
     /// @dev we disable fallback in case a user accidentally send funds because we don't want to handle that case
     receive() external payable {
-        revert("use deposit method");
+        revert("Use deposit method");
     }
 }

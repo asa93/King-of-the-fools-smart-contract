@@ -49,7 +49,7 @@ describe("TreasureChest", function () {
           to: chest.address,
           value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
         })
-      ).to.be.revertedWith("use deposit method");
+      ).to.be.revertedWith("Use deposit method");
     });
   });
   describe("Withdrawals", function () {
